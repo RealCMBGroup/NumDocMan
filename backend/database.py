@@ -4,19 +4,29 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).parent / '.env')
+BASE_DIR = Path(__file__).parent
+load_dotenv(BASE_DIR / '.env')
 
-DATABASE_URL = os.environ['DATABASE_URL']
-ASYNC_DATABASE_URL = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
+DATABASE_URL = os.environ.get('DATABASE_URL', f"sqlite:///{BASE_DIR / 'numdocman.db'}")
 
-engine = create_async_engine(
-    ASYNC_DATABASE_URL,
-    pool_size=10,
-    max_overflow=5,
-    pool_timeout=30,
-    pool_recycle=1800,
-    echo=False,
-)
+if DATABASE_URL.startswith('postgresql://'):
+    ASYNC_DATABASE_URL = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://', 1)
+    engine_kwargs = {
+        'pool_size': 10,
+        'max_overflow': 5,
+        'pool_timeout': 30,
+        'pool_recycle': 1800,
+        'echo': False,
+    }
+elif DATABASE_URL.startswith('sqlite:///'):
+    ASYNC_DATABASE_URL = DATABASE_URL.replace('sqlite:///', 'sqlite+aiosqlite:///', 1)
+    engine_kwargs = {
+        'echo': False,
+    }
+else:
+    raise RuntimeError('Unsupported DATABASE_URL. Use postgresql://... or sqlite:///...')
+
+engine = create_async_engine(ASYNC_DATABASE_URL, **engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,

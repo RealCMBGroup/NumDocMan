@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Plus, Upload, Download, FileText, Search, History, PenSquare, ChevronDown, Eye, Tag, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Layout from '../components/Layout';
-import SignatureModal from '../components/SignatureModal';
-import PDFViewerModal from '../components/PDFViewerModal';
 import api from '../api/api';
 import { BACKEND_URL } from '../api/api';
+
+const SignatureModal = React.lazy(() => import('../components/SignatureModal'));
+const PDFViewerModal = React.lazy(() => import('../components/PDFViewerModal'));
 
 export default function DocumentsPage() {
   const { t } = useTranslation();
@@ -523,22 +524,34 @@ export default function DocumentsPage() {
 
       {/* Signature Modal */}
       {showSignature && (
-        <SignatureModal
-          documentId={showSignature.id}
-          onClose={() => setShowSignature(null)}
-          onSigned={loadDocs}
-        />
+        <Suspense fallback={<ModalLoader />}>
+          <SignatureModal
+            documentId={showSignature.id}
+            onClose={() => setShowSignature(null)}
+            onSigned={loadDocs}
+          />
+        </Suspense>
       )}
 
       {/* PDF Viewer Modal */}
       {showViewer && (
-        <PDFViewerModal
-          doc={showViewer}
-          onClose={() => setShowViewer(null)}
-          onSign={(doc) => { setShowViewer(null); setShowSignature(doc); }}
-        />
+        <Suspense fallback={<ModalLoader />}>
+          <PDFViewerModal
+            doc={showViewer}
+            onClose={() => setShowViewer(null)}
+            onSign={(doc) => { setShowViewer(null); setShowSignature(doc); }}
+          />
+        </Suspense>
       )}
     </Layout>
+  );
+}
+
+function ModalLoader() {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+      <div className="w-8 h-8 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
+    </div>
   );
 }
 

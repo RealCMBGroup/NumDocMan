@@ -62,7 +62,7 @@
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "preview": "vite preview",
     "test": "echo \"No frontend tests configured\""
   },

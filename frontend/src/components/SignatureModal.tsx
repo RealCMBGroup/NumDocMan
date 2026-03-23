@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
+import api from '../api/api';
 
 export default function SignatureModal({ documentId, onClose, onSigned }) {
   const { t } = useTranslation();
@@ -113,7 +114,6 @@ export default function SignatureModal({ documentId, onClose, onSigned }) {
 
     setSubmitting(true);
     try {
-      const api = (await import('../api/api')).default;
       const payload = {
         ...form,
         signed_at: new Date(form.signed_at).toISOString(),
