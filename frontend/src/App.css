@@ -1,0 +1,47 @@
+/* NumDocMan - App styles */
+.App {
+  min-height: 100vh;
+}
+
+/* Signature canvas */
+.sig-canvas {
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+.animate-fade-in-up { animation: fadeInUp 0.4s ease forwards; }
+.animate-slide-in { animation: slideInLeft 0.3s ease forwards; }
+
+.stagger-1 { animation-delay: 0.05s; opacity: 0; }
+.stagger-2 { animation-delay: 0.1s; opacity: 0; }
+.stagger-3 { animation-delay: 0.15s; opacity: 0; }
+.stagger-4 { animation-delay: 0.2s; opacity: 0; }
+
+/* Grid border pattern for technical look */
+.grid-borders {
+  border-right: 1px solid rgba(226,232,240,0.4);
+  border-bottom: 1px solid rgba(226,232,240,0.4);
+}
+
+/* Metallic gear watermark */
+.brand-watermark {
+  background-image: url('https://customer-assets.emergentagent.com/job_doc-hub-pro/artifacts/5lgqesfz_favicon_RCG.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}

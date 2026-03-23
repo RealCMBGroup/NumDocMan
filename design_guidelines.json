@@ -1,0 +1,108 @@
+{
+  "theme": "light",
+  "archetype": "The Swiss & High-Contrast (Authority, Clarity, Truth)",
+  "typography": {
+    "headings": {
+      "fontFamily": "Chivo",
+      "weights": ["400", "700", "900"],
+      "tracking": "tight"
+    },
+    "body": {
+      "fontFamily": "IBM Plex Sans",
+      "weights": ["400", "500", "600"],
+      "tracking": "normal"
+    },
+    "mono": {
+      "fontFamily": "IBM Plex Mono"
+    }
+  },
+  "colors": {
+    "primary": {
+      "DEFAULT": "#2E60CC",
+      "foreground": "#FFFFFF",
+      "hover": "#1F46A1"
+    },
+    "destructive": {
+      "DEFAULT": "#E50000",
+      "foreground": "#FFFFFF",
+      "hover": "#B30000"
+    },
+    "background": "#F8F9FA",
+    "surface": "#FFFFFF",
+    "border": "#E2E8F0",
+    "metallic": {
+      "light": "#F1F3F5",
+      "DEFAULT": "#CED4DA",
+      "dark": "#868E96"
+    },
+    "text": {
+      "primary": "#121212",
+      "secondary": "#495057",
+      "muted": "#868E96"
+    }
+  },
+  "visual_enhancers": {
+    "borders": "Expose the skeleton. Grid borders for technical look (`border-r border-b border-border/40`). Use 1px solid strokes instead of soft shadows.",
+    "shadows": "Minimalist. Avoid soft drop-shadows. Use sharp, diffuse ambient shadows (`shadow-sm` or `shadow-[0_4px_16px_rgba(0,0,0,0.06)]`) for overlays/dialogs only.",
+    "radius": "Subtle roundness (`rounded-md` -> max 6px or 8px) or sharp edges (`rounded-none`). No pill-shapes for main container areas.",
+    "glassmorphism": "Only for Sticky Headers: `bg-white/70 backdrop-blur-xl border-b border-black/5`. No transparent backgrounds over content without blur.",
+    "textures": "Subtle grain texture on the login background. Minimal interface.",
+    "motion": "Micro-interactions for feedback. Hover state with slight lift (`-translate-y-px`) and border color darkening. No universal transitions (`transition: all` is forbidden). Target specific properties."
+  },
+  "layouts": {
+    "grid_system": "High Density Grid (For Dashboards). Mobile: `grid-cols-1`, Tablet: `grid-cols-3`, Desktop: `grid-cols-4`. Gap: Tight (`gap-4` or `gap-6`).",
+    "spacing": "Generous Spacing Philosophy. `p-6` or `p-8` for container paddings. Sections: `py-12` or `py-16`.",
+    "alignment": "Optical alignment over geometrical. Center align only if it improves hierarchy (e.g. login form), otherwise left-align paragraphs, inputs, tables."
+  },
+  "components": {
+    "buttons": "Rectangular with max 4px radius (`rounded-md`). Primary button: `bg-[#2E60CC] text-white hover:bg-[#1F46A1]`. Destructive: `bg-[#E50000] text-white hover:bg-[#B30000]`. Add specific transitions for transform and background-color.",
+    "cards": "Flat background (`bg-white`), 1px subtle border (`border-metallic-DEFAULT`), no shadow by default. On hover: subtle shadow, border color darkens.",
+    "forms": "Use Shadcn `Input`, `Select`, `Checkbox`. Left-aligned labels. Explicit hover and focus states (`focus:ring-2 focus:ring-[#2E60CC]/50`).",
+    "tables": "Dense, highly structured. `border-collapse`. Alternate row backgrounds (`bg-gray-50/50`). Sortable headers.",
+    "dialogs": "Use Shadcn Dialog. Sharp border, subtle backdrop blur for the overlay. Ensure the background isn't purely transparent.",
+    "toasts": "Use `sonner`. Top-right or bottom-right placement."
+  },
+  "icons": {
+    "library": "@phosphor-icons/react",
+    "installation": "yarn add @phosphor-icons/react",
+    "style": "Regular or Duotone for active states. Keep sizes moderate (16px to 24px)."
+  },
+  "images": [
+    {
+      "category": "Login Background",
+      "url": "https://images.unsplash.com/photo-1610018924075-558aa6b0d7a9?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "description": "Gray concrete building under blue sky. Use as an immersive background for the split-screen login page to convey industrial strength and scale. Add an overlay (`bg-black/40` or `bg-[#2E60CC]/20`) so text on top remains legible."
+    }
+  ],
+  "accessibility": {
+    "contrast": "Ensure minimum 4.5:1 ratio for normal text. Check RealCMB Blue (#2E60CC) against white (it passes, 4.84:1). Check Red (#E50000) against white (it passes, 4.49:1 for large text, adjust to #CC0000 if needed for small text).",
+    "interactions": "All interactive elements MUST include `data-testid` attribute (e.g., `data-testid=\"login-submit-button\"`).",
+    "focus": "High contrast focus states for all form inputs and buttons."
+  },
+  "instructions_to_main_agent": [
+    "You must use Chivo for Headings and IBM Plex Sans for Body. Import these via Google Fonts.",
+    "Install `@phosphor-icons/react` for icons.",
+    "Create the `design_guidelines.json` exact rules inside your Tailwind configuration.",
+    "Build the dashboard using the 'Grid Borders / Technical Look' - expose the grid, use 1px metallic borders, minimal shadows.",
+    "Implement Internationalization (i18n) for EN/FR right from the start using `react-i18next` or similar.",
+    "For electronic signatures, implement a canvas drawing area with an option for text-based signature (using a script font for the text option).",
+    "DO NOT apply universal `transition: all`. Target properties specifically.",
+    "DO NOT use Inter, Roboto, or generic fonts for headings.",
+    "NEVER use a purely transparent background for dropdowns or modals - they must have a solid or glass background to remain legible.",
+    "All components should use named exports. Pages should use default exports.",
+    "For the login page, use the provided industrial background image in a split-screen layout with the login form on the other side."
+  ],
+  "universal_guidelines": [
+    "You tend to converge toward generic, 'on distribution' outputs. Make creative, distinctive frontends.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Create depth through layered design elements with z-index hierarchy and glassmorphism (12-24px blur) where appropriate.",
+    "You MUST NOT apply universal transition. Always add transitions for specific interactive elements.",
+    "You MUST NOT center align the app container. No `.App { text-align: center; }`.",
+    "Always use modern UI patterns (sharp edges for this specific industrial project) with interaction animations.",
+    "NEVER use AI assistant Emoji characters for icons.",
+    "Every interaction needs micro-animations (hover, focus, transitions).",
+    "Subtle grain textures, noise overlays, custom cursors separate good from extraordinary.",
+    "All interactive elements MUST include `data-testid` attribute.",
+    "Use named exports for components, default exports for pages."
+  ]
+}

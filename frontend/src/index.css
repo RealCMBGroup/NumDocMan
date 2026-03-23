@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 97.6%;
+    --foreground: 0 0% 7.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7.1%;
+    --primary: 220 63% 49%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 93%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 100% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 220 63% 49%;
+    --radius: 0.375rem;
+    --chart-1: 220 63% 49%;
+    --chart-2: 0 100% 45%;
+    --chart-3: 142 71% 45%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 258 54% 52%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Chivo', sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+}
+
+@layer utilities {
+  .font-chivo { font-family: 'Chivo', sans-serif; }
+  .font-ibm { font-family: 'IBM Plex Sans', sans-serif; }
+  .font-mono-ibm { font-family: 'IBM Plex Mono', monospace; }
+
+  .ndm-card {
+    @apply bg-white border border-[#E2E8F0] rounded-md;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .ndm-card:hover {
+    @apply border-[#CED4DA];
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+
+  .ndm-btn-primary {
+    @apply bg-[#2E60CC] text-white rounded-md px-4 py-2 text-sm font-medium;
+    transition: background-color 150ms ease, transform 100ms ease;
+  }
+  .ndm-btn-primary:hover {
+    @apply bg-[#1F46A1];
+    transform: translateY(-1px);
+  }
+  .ndm-btn-primary:active { transform: translateY(0); }
+
+  .ndm-btn-danger {
+    @apply bg-[#E50000] text-white rounded-md px-4 py-2 text-sm font-medium;
+    transition: background-color 150ms ease;
+  }
+  .ndm-btn-danger:hover { @apply bg-[#B30000]; }
+
+  .ndm-input {
+    @apply w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-md bg-white;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .ndm-input:focus {
+    @apply outline-none border-[#2E60CC];
+    box-shadow: 0 0 0 3px rgba(46, 96, 204, 0.12);
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 text-sm rounded-md text-[#495057];
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  .sidebar-link:hover {
+    @apply bg-[#F1F3F5] text-[#121212];
+  }
+  .sidebar-link.active {
+    @apply bg-[#2E60CC]/10 text-[#2E60CC] font-medium;
+  }
+
+  .badge-state {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+  }
+
+  .table-dense th {
+    @apply text-xs font-semibold uppercase tracking-wide text-[#868E96] bg-[#F8F9FA] px-3 py-2.5 border-b border-[#E2E8F0];
+  }
+  .table-dense td {
+    @apply px-3 py-2.5 text-sm border-b border-[#E2E8F0];
+  }
+  .table-dense tr:hover td {
+    @apply bg-[#F8F9FA]/50;
+  }
+}
