@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './i18n';
 import './App.css';
@@ -14,7 +14,11 @@ import AdminPage from './pages/AdminPage';
 import SettingsPage from './pages/SettingsPage';
 import AuthCallback from './pages/AuthCallback';
 
-function ProtectedRoute({ children }) {
+type ProtectedRouteProps = {
+  children: React.ReactNode;
+};
+
+function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   if (loading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">

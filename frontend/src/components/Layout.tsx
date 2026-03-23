@@ -7,7 +7,15 @@ import {
   LogOut, ChevronLeft, ChevronRight, Globe, Bell, Menu, X, User
 } from 'lucide-react';
 
-export default function Layout({ children }) {
+type LayoutProps = {
+  children: React.ReactNode;
+};
+
+type SidebarProps = {
+  mobile?: boolean;
+};
+
+export default function Layout({ children }: LayoutProps) {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -28,7 +36,7 @@ export default function Layout({ children }) {
     navigate('/login');
   };
 
-  const Sidebar = ({ mobile = false }) => (
+  const Sidebar = ({ mobile = false }: SidebarProps) => (
     <div className={`flex flex-col h-full bg-white border-r border-[#E2E8F0] ${mobile ? 'w-64' : collapsed ? 'w-16' : 'w-60'} transition-all duration-200`}>
       {/* Logo */}
       <div className={`flex items-center gap-3 p-4 border-b border-[#E2E8F0] ${collapsed && !mobile ? 'justify-center' : ''}`}>

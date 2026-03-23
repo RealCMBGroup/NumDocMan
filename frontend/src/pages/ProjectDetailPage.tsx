@@ -32,7 +32,7 @@ export default function ProjectDetailPage() {
 
   // ID Rule
   const [idRule, setIdRule] = useState(null);
-  const [ruleForm, setRuleForm] = useState({ pattern: '{org}_{proj}_{phase}_{type}_{seq:05d}', separator: '_', seq_digits: 5 });
+  const [ruleForm, setRuleForm] = useState({ pattern: '{org}_{proj}_{phase}_{type}_{seq:05d}', separator: '_', seq_digits: '5' });
 
   // Members
   const [members, setMembers] = useState([]);
@@ -54,7 +54,7 @@ export default function ProjectDetailPage() {
       try {
         const rule = await api.get(`/projects/${projectId}/id-rule`);
         setIdRule(rule.data);
-        setRuleForm({ pattern: rule.data.pattern, separator: rule.data.separator, seq_digits: rule.data.seq_digits });
+        setRuleForm({ pattern: rule.data.pattern, separator: rule.data.separator, seq_digits: String(rule.data.seq_digits) });
       } catch {}
     } catch { toast.error(t('errors.server_error')); }
     finally { setLoading(false); }
@@ -131,7 +131,7 @@ export default function ProjectDetailPage() {
   const handleSaveRule = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post(`/projects/${projectId}/id-rule`, { ...ruleForm, seq_digits: parseInt(ruleForm.seq_digits) });
+      const res = await api.post(`/projects/${projectId}/id-rule`, { ...ruleForm, seq_digits: parseInt(ruleForm.seq_digits, 10) });
       setIdRule(res.data);
       toast.success(t('success'));
     } catch (err) { toast.error(err.response?.data?.detail || t('errors.unknown')); }

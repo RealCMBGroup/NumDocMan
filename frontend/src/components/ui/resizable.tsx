@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils"
 
 const ResizablePanelGroup = ({
   className,
+  direction = "horizontal",
   ...props
-}) => (
+}: any) => (
   <ResizablePrimitive.PanelGroup
+    direction={direction as "horizontal" | "vertical"}
     className={cn(
       "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
       className

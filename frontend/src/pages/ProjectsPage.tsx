@@ -6,6 +6,14 @@ import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import api from '../api/api';
 
+const emptyProjectForm = (orgId = '') => ({
+  name: '',
+  code: '',
+  description: '',
+  phases: [] as string[],
+  org_id: orgId,
+});
+
 export default function ProjectsPage() {
   const { t } = useTranslation();
   const [orgs, setOrgs] = useState([]);
@@ -17,7 +25,7 @@ export default function ProjectsPage() {
   const [showProjModal, setShowProjModal] = useState(false);
   const [editProject, setEditProject] = useState(null);
   const [orgForm, setOrgForm] = useState({ name: '', code: '', description: '' });
-  const [projForm, setProjForm] = useState({ name: '', code: '', description: '', phases: [], org_id: '' });
+  const [projForm, setProjForm] = useState(emptyProjectForm());
   const [phaseInput, setPhaseInput] = useState('');
 
   const loadOrgs = useCallback(async () => {
@@ -63,7 +71,7 @@ export default function ProjectsPage() {
       }
       toast.success(t('success'));
       setShowProjModal(false);
-      setProjForm({ name: '', code: '', description: '', phases: [] });
+      setProjForm(emptyProjectForm(selectedOrg));
       setEditProject(null);
       loadProjects();
     } catch (err) { toast.error(err.response?.data?.detail || t('errors.unknown')); }
@@ -99,7 +107,7 @@ export default function ProjectsPage() {
               <Building2 size={15} />
               {t('org.create')}
             </button>
-            <button data-testid="create-project-btn" onClick={() => { setEditProject(null); setProjForm({ name: '', code: '', description: '', phases: [] }); setShowProjModal(true); }} className="ndm-btn-primary flex items-center gap-2" disabled={!selectedOrg}>
+            <button data-testid="create-project-btn" onClick={() => { setEditProject(null); setProjForm(emptyProjectForm(selectedOrg)); setShowProjModal(true); }} className="ndm-btn-primary flex items-center gap-2" disabled={!selectedOrg}>
               <Plus size={15} />
               {t('project.create')}
             </button>
@@ -170,7 +178,7 @@ export default function ProjectsPage() {
                   <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                     <button
                       data-testid={`edit-project-${p.id}`}
-                      onClick={() => { setEditProject(p); setProjForm({ name: p.name, code: p.code, description: p.description || '', phases: p.phases || [] }); setShowProjModal(true); }}
+                      onClick={() => { setEditProject(p); setProjForm({ name: p.name, code: p.code, description: p.description || '', phases: p.phases || [], org_id: selectedOrg }); setShowProjModal(true); }}
                       className="p-1.5 rounded hover:bg-[#F1F3F5] text-[#868E96]"
                       style={{ transition: 'background-color 150ms ease' }}
                     >

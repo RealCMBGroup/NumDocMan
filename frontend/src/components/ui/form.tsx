@@ -7,16 +7,24 @@ import { Label } from "@/components/ui/label"
 
 const Form = FormProvider
 
-const FormFieldContext = React.createContext({})
+type FormFieldContextValue = {
+  name: string;
+}
+
+type FormItemContextValue = {
+  id: string;
+}
+
+const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue)
 
 const FormField = (
   {
     ...props
-  }
+  }: any
 ) => {
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
-      <Controller {...props} />
+      <Controller {...(props as any)} />
     </FormFieldContext.Provider>
   );
 }
@@ -44,7 +52,7 @@ const useFormField = () => {
   }
 }
 
-const FormItemContext = React.createContext({})
+const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue)
 
 const FormItem = React.forwardRef(({ className, ...props }, ref) => {
   const id = React.useId()

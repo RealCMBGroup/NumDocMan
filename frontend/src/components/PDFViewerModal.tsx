@@ -12,7 +12,20 @@ import api from '../api/api';
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-export default function PDFViewerModal({ doc, onClose, onSign }) {
+type PDFViewerModalProps = {
+  doc: any;
+  onClose: () => void;
+  onSign?: (doc: any) => void;
+};
+
+type InfoRowProps = {
+  label: string;
+  value: React.ReactNode;
+  mono?: boolean;
+  color?: string;
+};
+
+export default function PDFViewerModal({ doc, onClose, onSign }: PDFViewerModalProps) {
   const { t } = useTranslation();
   const [numPages, setNumPages] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -311,7 +324,7 @@ export default function PDFViewerModal({ doc, onClose, onSign }) {
   );
 }
 
-function InfoRow({ label, value, mono, color }) {
+function InfoRow({ label, value, mono = false, color }: InfoRowProps) {
   return (
     <div>
       <p className="font-ibm text-[9px] text-white/30 uppercase tracking-wide">{label}</p>

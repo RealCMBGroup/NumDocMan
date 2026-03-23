@@ -6,6 +6,7 @@ import Layout from '../components/Layout';
 import SignatureModal from '../components/SignatureModal';
 import PDFViewerModal from '../components/PDFViewerModal';
 import api from '../api/api';
+import { BACKEND_URL } from '../api/api';
 
 export default function DocumentsPage() {
   const { t } = useTranslation();
@@ -72,7 +73,14 @@ export default function DocumentsPage() {
     if (!selectedProject) { setLoading(false); return; }
     setLoading(true);
     try {
-      const params = { project_id: selectedProject, page: currentPage, per_page: 20 };
+      const params: {
+        project_id: string;
+        page: number;
+        per_page: number;
+        state_id?: string;
+        doc_type_id?: string;
+        search?: string;
+      } = { project_id: selectedProject, page: currentPage, per_page: 20 };
       if (filters.state_id) params.state_id = filters.state_id;
       if (filters.doc_type_id) params.doc_type_id = filters.doc_type_id;
       if (filters.search) params.search = filters.search;
@@ -260,7 +268,7 @@ export default function DocumentsPage() {
                       </td>
                       <td className="hidden lg:table-cell">
                         {doc.has_file ? (
-                          <button onClick={() => window.open(`${process.env.REACT_APP_BACKEND_URL}/api/documents/${doc.id}/download`)} className="text-xs text-[#2E60CC] hover:underline font-ibm flex items-center gap-1">
+                          <button onClick={() => window.open(`${BACKEND_URL}/api/documents/${doc.id}/download`)} className="text-xs text-[#2E60CC] hover:underline font-ibm flex items-center gap-1">
                             <Download size={11} /> {doc.file_name?.substring(0, 15)}{doc.file_name?.length > 15 ? '...' : ''}
                           </button>
                         ) : (

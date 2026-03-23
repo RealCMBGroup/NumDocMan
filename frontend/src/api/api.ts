@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+export const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || '';
 
 const api = axios.create({
   baseURL: `${BACKEND_URL}/api`,
@@ -10,7 +11,9 @@ const api = axios.create({
 // Auto-attach token from localStorage
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('ndm_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
