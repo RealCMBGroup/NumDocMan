@@ -6,7 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
-from database import engine, Base
+from database import engine, Base, AsyncSessionLocal
+from models import User
+from auth_utils import hash_password
 from routers import auth_routes, projects, documents, admin, kpi, storage
 
 ROOT_DIR = Path(__file__).parent
@@ -45,6 +47,25 @@ async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("NumDocMan API started - DB tables created/verified")
+    await _ensure_superadmin()
+
+
+async def _ensure_superadmin():
+    from sqlalchemy import select
+    SUPERADMIN_EMAIL = "superadmin@numdocman.com"
+    SUPERADMIN_PASSWORD = "Admin123!"
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(select(User).where(User.email == SUPERADMIN_EMAIL))
+        if result.scalar_one_or_none() is None:
+            user = User(
+                email=SUPERADMIN_EMAIL,
+                password_hash=hash_password(SUPERADMIN_PASSWORD),
+                name="Super Admin",
+                is_superadmin=True,
+            )
+            db.add(user)
+            await db.commit()
+            logger.info("Superadmin account created: %s", SUPERADMIN_EMAIL)
 
 
 @app.on_event("shutdown")
