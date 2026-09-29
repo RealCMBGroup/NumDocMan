@@ -128,10 +128,11 @@ if ($createdVenv -or -not $backendDependenciesInstalled) {
     Invoke-ExternalCommand -FilePath $context.PythonExe -Arguments @('-m', 'pip', 'install', '-r', 'requirements.txt') -WorkingDirectory $context.BackendDir
 }
 
-@(
-    'VITE_BACKEND_URL=' + $context.BackendUrl,
+$runtimeEnvContent = @(
+    'VITE_BACKEND_URL=' + $context.BackendUrl
     'REACT_APP_BACKEND_URL=' + $context.BackendUrl
-) | Set-Content -LiteralPath $context.FrontendRuntimeEnvPath -Encoding UTF8
+) -join [Environment]::NewLine
+Set-Content -LiteralPath $context.FrontendRuntimeEnvPath -Value $runtimeEnvContent -Encoding UTF8
 
 $backendProcess = $null
 $frontendProcess = $null

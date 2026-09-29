@@ -3,8 +3,8 @@ import requests
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from pydantic import BaseModel, EmailStr
+from sqlalchemy import select, func
+from pydantic import BaseModel, EmailStr, field_validator
 
 from database import get_db
 from models import User
@@ -13,16 +13,30 @@ from auth_utils import hash_password, verify_password, create_token, get_current
 router = APIRouter()
 
 
+def normalize_email(email: str) -> str:
+    return email.strip().lower()
+
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     name: str
     preferred_language: str = "fr"
 
+    @field_validator("email")
+    @classmethod
+    def _normalize_email(cls, v: str) -> str:
+        return normalize_email(v)
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+    @field_validator("email")
+    @classmethod
+    def _normalize_email(cls, v: str) -> str:
+        return normalize_email(v)
 
 
 class GoogleCallbackRequest(BaseModel):
@@ -31,7 +45,7 @@ class GoogleCallbackRequest(BaseModel):
 
 @router.post("/register")
 async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.email == data.email))
+    result = await db.execute(select(User).where(func.lower(User.email) == data.email))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -51,7 +65,7 @@ async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
 
 @router.post("/login")
 async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.email == data.email))
+    result = await db.execute(select(User).where(func.lower(User.email) == data.email))
     user = result.scalar_one_or_none()
     if not user or not user.password_hash:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -77,11 +91,11 @@ async def google_callback(data: GoogleCallbackRequest, db: AsyncSession = Depend
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"OAuth error: {str(e)}")
 
-    email = oauth_data.get("email")
+    email = normalize_email(oauth_data.get("email") or "")
     if not email:
         raise HTTPException(status_code=400, detail="No email from OAuth")
 
-    result = await db.execute(select(User).where(User.email == email))
+    result = await db.execute(select(User).where(func.lower(User.email) == email))
     user = result.scalar_one_or_none()
 
     if not user:

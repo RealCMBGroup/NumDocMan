@@ -29,7 +29,11 @@ export default function LoginPage() {
       toast.success(mode === 'login' ? t('auth.welcome_back') : t('success'));
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.detail || t('errors.unknown'));
+      if (mode === 'login' && err.response?.status === 401) {
+        toast.error(t('errors.invalid_credentials'));
+      } else {
+        toast.error(err.response?.data?.detail || t('errors.unknown'));
+      }
     } finally {
       setLoading(false);
     }

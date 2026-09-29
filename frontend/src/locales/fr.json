@@ -232,6 +232,7 @@
   },
   "errors": {
     "required_field": "Ce champ est obligatoire",
+    "invalid_credentials": "Email ou mot de passe incorrect",
     "invalid_email": "Email invalide",
     "server_error": "Erreur serveur",
     "not_found": "Introuvable",

@@ -9,7 +9,7 @@ import os
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
 # Test credentials
-ADMIN_EMAIL = "admin@numdocman.com"
+ADMIN_EMAIL = "superadmin@numdocman.com"
 ADMIN_PASSWORD = "Admin123!"
 
 created_ids = {}

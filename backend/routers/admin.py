@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from pydantic import BaseModel, EmailStr
+from sqlalchemy import select, func
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 
 from database import get_db
 from models import User, OrgMember, Organization
 from auth_utils import get_current_user, hash_password
+from routers.auth_routes import normalize_email
 
 router = APIRouter()
 
@@ -17,6 +18,11 @@ class UserCreate(BaseModel):
     password: Optional[str] = None
     is_superadmin: Optional[bool] = False
     preferred_language: Optional[str] = "fr"
+
+    @field_validator("email")
+    @classmethod
+    def _normalize_email(cls, v: str) -> str:
+        return normalize_email(v)
 
 
 class UserUpdate(BaseModel):
@@ -56,7 +62,7 @@ async def create_user(data: UserCreate, db: AsyncSession = Depends(get_db), curr
     if not current_user.is_superadmin:
         raise HTTPException(403, "Superadmin required")
 
-    result = await db.execute(select(User).where(User.email == data.email))
+    result = await db.execute(select(User).where(func.lower(User.email) == data.email))
     if result.scalar_one_or_none():
         raise HTTPException(400, "Email already registered")
 
