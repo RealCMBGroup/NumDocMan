@@ -86,6 +86,8 @@
     @apply w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-md bg-white;
     transition: border-color 150ms ease, box-shadow 150ms ease;
   }
+  .ndm-input-icon-left { padding-left: 2.25rem; }
+  .ndm-input-icon-right { padding-right: 2.25rem; }
   .ndm-input:focus {
     @apply outline-none border-[#2E60CC];
     box-shadow: 0 0 0 3px rgba(46, 96, 204, 0.12);

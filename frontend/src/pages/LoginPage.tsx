@@ -180,7 +180,7 @@ export default function LoginPage() {
                     value={form.name}
                     onChange={handleChange}
                     placeholder={t('auth.name')}
-                    className="ndm-input pl-9"
+                    className="ndm-input ndm-input-icon-left"
                     required
                   />
                 </div>
@@ -198,7 +198,7 @@ export default function LoginPage() {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
-                  className="ndm-input pl-9"
+                  className="ndm-input ndm-input-icon-left"
                   required
                 />
               </div>
@@ -215,7 +215,7 @@ export default function LoginPage() {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="ndm-input pl-9 pr-9"
+                  className="ndm-input ndm-input-icon-left ndm-input-icon-right"
                   required
                 />
                 <button
