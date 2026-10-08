@@ -1,2 +1,2 @@
 ID                        / Mot de Passe
-superadmin@numdocman.com / Admin123!.
+superadmin@numdocman.com / Admin123!
