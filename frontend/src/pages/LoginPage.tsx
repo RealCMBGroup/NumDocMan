@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Lock, Mail, User, Globe } from 'lucide-react';
@@ -167,7 +167,7 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             {mode === 'register' && (
               <div>
                 <label className="block text-xs font-medium text-[#495057] mb-1.5 font-ibm">{t('auth.name')}</label>
@@ -195,6 +195,7 @@ export default function LoginPage() {
                   data-testid="login-email"
                   type="email"
                   name="email"
+                  autoComplete="off"
                   value={form.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
@@ -212,6 +213,7 @@ export default function LoginPage() {
                   data-testid="login-password"
                   type={showPwd ? 'text' : 'password'}
                   name="password"
+                  autoComplete="off"
                   value={form.password}
                   onChange={handleChange}
                   placeholder="••••••••"
@@ -228,6 +230,18 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
+            {mode === 'login' && (
+              <div className="text-right -mt-2">
+                <Link
+                  to="/forgot-password"
+                  data-testid="forgot-password-link"
+                  className="text-sm text-[#2E60CC] font-medium hover:underline"
+                >
+                  {t('auth.forgot_password')}
+                </Link>
+              </div>
+            )}
 
             {mode === 'register' && (
               <div>
