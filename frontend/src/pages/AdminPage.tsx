@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Shield, Users } from 'lucide-react';
+import { Plus, Pencil, Trash2, Shield, Users, Building2 } from 'lucide-react';
 import Layout from '../components/Layout';
 import api from '../api/api';
 import { useAuth } from '../context/AuthContext';
 
-const TABS = ['users', 'roles'];
+const TABS = ['organizations', 'users', 'roles'];
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -18,6 +18,10 @@ export default function AdminPage() {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [showOrgModal, setShowOrgModal] = useState(false);
+  const [editOrg, setEditOrg] = useState(null);
+  const [orgForm, setOrgForm] = useState({ name: '', code: '', description: '' });
+
   const [showUserModal, setShowUserModal] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [userForm, setUserForm] = useState({ email: '', name: '', password: '', is_superadmin: false, preferred_language: 'fr' });
@@ -27,12 +31,15 @@ export default function AdminPage() {
   const [roleForm, setRoleForm] = useState({ name: '', code: '', permissions: [], color: '#6B7280', description: '' });
   const [permInput, setPermInput] = useState('');
 
-  useEffect(() => {
-    api.get('/organizations').then(res => {
+  const loadOrgs = useCallback(async () => {
+    try {
+      const res = await api.get('/organizations');
       setOrgs(res.data);
-      if (res.data.length > 0) setSelectedOrg(res.data[0].id);
-    });
-  }, []);
+      setSelectedOrg(current => res.data.some(org => org.id === current) ? current : (res.data[0]?.id || ''));
+    } catch { toast.error(t('errors.server_error')); }
+  }, [t]);
+
+  useEffect(() => { loadOrgs(); }, [loadOrgs]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -49,13 +56,38 @@ export default function AdminPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  const handleSaveOrg = async (e) => {
+    e.preventDefault();
+    try {
+      if (editOrg) {
+        await api.put(`/organizations/${editOrg.id}`, orgForm);
+      } else {
+        await api.post('/organizations', orgForm);
+      }
+      toast.success(t('success'));
+      setShowOrgModal(false);
+      setEditOrg(null);
+      setOrgForm({ name: '', code: '', description: '' });
+      await loadOrgs();
+    } catch (err) { toast.error(err.response?.data?.detail || t('errors.unknown')); }
+  };
+
+  const handleDeleteOrg = async (id) => {
+    if (!window.confirm('Supprimer cette organisation et toutes ses données associées ?')) return;
+    try {
+      await api.delete(`/organizations/${id}`);
+      toast.success(t('success'));
+      await loadOrgs();
+    } catch (err) { toast.error(err.response?.data?.detail || t('errors.server_error')); }
+  };
+
   const handleSaveUser = async (e) => {
     e.preventDefault();
     try {
       if (editUser) {
         await api.put(`/admin/users/${editUser.id}`, userForm);
       } else {
-        await api.post('/admin/users', userForm);
+        await api.post('/admin/users', { ...userForm, org_id: selectedOrg || undefined });
       }
       toast.success(t('success'));
       setShowUserModal(false);
@@ -142,7 +174,7 @@ export default function AdminPage() {
                 activeTab === tab ? 'border-[#2E60CC] text-[#2E60CC]' : 'border-transparent text-[#868E96] hover:text-[#495057]'
               }`}
             >
-              {tab === 'users' ? t('admin.users') : t('admin.roles')}
+              {tab === 'organizations' ? t('org.title') : tab === 'users' ? t('admin.users') : t('admin.roles')}
             </button>
           ))}
         </div>
@@ -153,6 +185,40 @@ export default function AdminPage() {
           </div>
         ) : (
           <>
+            {/* Organizations Tab */}
+            {activeTab === 'organizations' && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="font-chivo font-700 text-base text-[#121212]">{t('org.title')} ({orgs.length})</h2>
+                  <button data-testid="create-organization-btn" onClick={() => { setEditOrg(null); setOrgForm({ name: '', code: '', description: '' }); setShowOrgModal(true); }} className="ndm-btn-primary flex items-center gap-2 text-sm">
+                    <Plus size={14} /> {t('org.create')}
+                  </button>
+                </div>
+                <div className="ndm-card overflow-hidden">
+                  <table className="w-full">
+                    <thead><tr className="table-dense"><th className="text-left">{t('name')}</th><th className="text-left">{t('code')}</th><th className="text-left hidden md:table-cell">{t('description')}</th><th className="text-right">{t('actions')}</th></tr></thead>
+                    <tbody>
+                      {orgs.length === 0 ? (
+                        <tr><td colSpan={4} className="text-center py-8 text-sm text-[#868E96] font-ibm">{t('org.no_org')}</td></tr>
+                      ) : orgs.map(org => (
+                        <tr key={org.id} data-testid={`organization-row-${org.id}`} className="table-dense">
+                          <td className="font-ibm font-medium text-[#121212]">{org.name}</td>
+                          <td className="font-mono-ibm text-[#868E96]">{org.code}</td>
+                          <td className="hidden md:table-cell text-sm text-[#868E96]">{org.description || '—'}</td>
+                          <td className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button data-testid={`edit-organization-${org.id}`} aria-label={`Modifier ${org.name}`} onClick={() => { setEditOrg(org); setOrgForm({ name: org.name, code: org.code, description: org.description || '' }); setShowOrgModal(true); }} className="p-1.5 rounded hover:bg-[#F1F3F5] text-[#868E96]"><Pencil size={13} /></button>
+                              <button data-testid={`delete-organization-${org.id}`} aria-label={`Supprimer ${org.name}`} onClick={() => handleDeleteOrg(org.id)} className="p-1.5 rounded hover:bg-red-50 text-[#868E96] hover:text-[#E50000]"><Trash2 size={13} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {/* Users Tab */}
             {activeTab === 'users' && (
               <div className="space-y-4">
@@ -247,6 +313,18 @@ export default function AdminPage() {
           </>
         )}
       </div>
+
+      {/* Organization Modal */}
+      {showOrgModal && (
+        <AdminModal title={editOrg ? t('edit') : t('org.create')} onClose={() => setShowOrgModal(false)}>
+          <form onSubmit={handleSaveOrg} className="space-y-3">
+            <div><label className="block text-xs font-medium text-[#495057] mb-1 font-ibm">{t('org.name')} *</label><input className="ndm-input" value={orgForm.name} onChange={e => setOrgForm({ ...orgForm, name: e.target.value })} required /></div>
+            <div><label className="block text-xs font-medium text-[#495057] mb-1 font-ibm">{t('org.code')} *</label><input className="ndm-input" value={orgForm.code} onChange={e => setOrgForm({ ...orgForm, code: e.target.value.toUpperCase() })} required /></div>
+            <div><label className="block text-xs font-medium text-[#495057] mb-1 font-ibm">{t('description')}</label><textarea className="ndm-input min-h-20" value={orgForm.description} onChange={e => setOrgForm({ ...orgForm, description: e.target.value })} /></div>
+            <div className="flex justify-end gap-2 pt-1"><button type="button" onClick={() => setShowOrgModal(false)} className="px-3 py-1.5 text-sm border border-[#E2E8F0] rounded-md text-[#495057] font-ibm">{t('cancel')}</button><button type="submit" className="ndm-btn-primary">{t('save')}</button></div>
+          </form>
+        </AdminModal>
+      )}
 
       {/* User Modal */}
       {showUserModal && (

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, delete
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timezone
@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 from database import get_db
 from models import (
     Organization, OrgMember, Project, ProjectMember,
-    DocumentType, WorkflowState, WorkflowTransition, DocIdRule, Role, User
+    DocumentType, WorkflowState, WorkflowTransition, DocIdRule, Role, User,
+    Document, DocumentHistory, Signature, StorageConfig, KPIConfig
 )
 from auth_utils import get_current_user
 
@@ -25,6 +26,7 @@ class OrgCreate(BaseModel):
 
 class OrgUpdate(BaseModel):
     name: Optional[str] = None
+    code: Optional[str] = None
     description: Optional[str] = None
     logo_url: Optional[str] = None
 
@@ -134,11 +136,43 @@ async def get_org(org_id: str, db: AsyncSession = Depends(get_db), current_user:
 async def update_org(org_id: str, data: OrgUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     org = await _get_org_or_404(org_id, db)
     await _check_org_admin(org_id, current_user.id, db, current_user)
-    for k, v in data.model_dump(exclude_none=True).items():
+    update_data = data.model_dump(exclude_none=True)
+    if "code" in update_data and update_data["code"] != org.code:
+        duplicate = await db.execute(select(Organization).where(Organization.code == update_data["code"], Organization.id != org_id))
+        if duplicate.scalar_one_or_none():
+            raise HTTPException(400, "Organization code already exists")
+    for k, v in update_data.items():
         setattr(org, k, v)
     await db.commit()
     await db.refresh(org)
     return _org_dict(org)
+
+
+@router.delete("/organizations/{org_id}", status_code=204)
+async def delete_org(org_id: str, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if not current_user.is_superadmin:
+        raise HTTPException(403, "Superadmin required")
+
+    org = await _get_org_or_404(org_id, db)
+    project_ids = select(Project.id).where(Project.org_id == org_id)
+    document_ids = select(Document.id).where(Document.project_id.in_(project_ids))
+
+    # Remove dependent rows in FK order so this works consistently on PostgreSQL and SQLite.
+    await db.execute(delete(Signature).where(Signature.document_id.in_(document_ids)))
+    await db.execute(delete(DocumentHistory).where(DocumentHistory.document_id.in_(document_ids)))
+    await db.execute(delete(Document).where(Document.id.in_(document_ids)))
+    await db.execute(delete(WorkflowTransition).where(WorkflowTransition.project_id.in_(project_ids)))
+    await db.execute(delete(WorkflowState).where(WorkflowState.project_id.in_(project_ids)))
+    await db.execute(delete(DocumentType).where(DocumentType.project_id.in_(project_ids)))
+    await db.execute(delete(DocIdRule).where(DocIdRule.project_id.in_(project_ids)))
+    await db.execute(delete(ProjectMember).where(ProjectMember.project_id.in_(project_ids)))
+    await db.execute(delete(Project).where(Project.id.in_(project_ids)))
+    await db.execute(delete(Role).where(Role.org_id == org_id))
+    await db.execute(delete(StorageConfig).where(StorageConfig.org_id == org_id))
+    await db.execute(delete(KPIConfig).where(KPIConfig.org_id == org_id))
+    await db.execute(delete(OrgMember).where(OrgMember.org_id == org_id))
+    await db.delete(org)
+    await db.commit()
 
 
 @router.get("/organizations/{org_id}/members")

@@ -18,6 +18,7 @@ class UserCreate(BaseModel):
     password: Optional[str] = None
     is_superadmin: Optional[bool] = False
     preferred_language: Optional[str] = "fr"
+    org_id: Optional[str] = None
 
     @field_validator("email")
     @classmethod
@@ -74,6 +75,12 @@ async def create_user(data: UserCreate, db: AsyncSession = Depends(get_db), curr
         preferred_language=data.preferred_language,
     )
     db.add(user)
+    if data.org_id:
+        org_result = await db.execute(select(Organization).where(Organization.id == data.org_id))
+        if not org_result.scalar_one_or_none():
+            raise HTTPException(404, "Organization not found")
+        await db.flush()
+        db.add(OrgMember(org_id=data.org_id, user_id=user.id, role="member"))
     await db.commit()
     await db.refresh(user)
     return _user_dict(user)
