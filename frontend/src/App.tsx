@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'sonner';
 
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
+const PasswordRecoveryPage = React.lazy(() => import('./pages/PasswordRecoveryPage'));
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
 const ProjectsPage = React.lazy(() => import('./pages/ProjectsPage'));
 const ProjectDetailPage = React.lazy(() => import('./pages/ProjectDetailPage'));
@@ -57,6 +58,8 @@ function AppRouter() {
   return (
     <Routes>
       <Route path="/login" element={<Suspense fallback={<AppLoader />}><LoginPage /></Suspense>} />
+      <Route path="/forgot-password" element={<Suspense fallback={<AppLoader />}><PasswordRecoveryPage /></Suspense>} />
+      <Route path="/reset-password" element={<Suspense fallback={<AppLoader />}><PasswordRecoveryPage /></Suspense>} />
       <Route path="/dashboard" element={<ProtectedRoute><Suspense fallback={<AppLoader />}><DashboardPage /></Suspense></ProtectedRoute>} />
       <Route path="/projects" element={<ProtectedRoute><Suspense fallback={<AppLoader />}><ProjectsPage /></Suspense></ProtectedRoute>} />
       <Route path="/projects/:projectId" element={<ProtectedRoute><Suspense fallback={<AppLoader />}><ProjectDetailPage /></Suspense></ProtectedRoute>} />
