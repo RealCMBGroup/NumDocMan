@@ -197,7 +197,7 @@ export default function DocumentsPage() {
           )}
           <div className="relative">
             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#868E96]" />
-            <input data-testid="doc-search" value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} placeholder={t('search') + '...'} className="ndm-input pl-8 w-44" />
+            <input data-testid="doc-search" value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })} placeholder={t('search') + '...'} className="ndm-input ndm-input-icon-left w-44" />
           </div>
           {wfStates.length > 0 && (
             <select value={filters.state_id} onChange={e => setFilters({ ...filters, state_id: e.target.value })} className="ndm-input w-auto">

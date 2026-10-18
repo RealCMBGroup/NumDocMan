@@ -147,7 +147,7 @@ export default function ProjectsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('search') + '...'}
-              className="ndm-input pl-9"
+              className="ndm-input ndm-input-icon-left"
             />
           </div>
         )}
