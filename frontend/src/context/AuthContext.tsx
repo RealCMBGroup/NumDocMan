@@ -6,7 +6,9 @@ export type AuthUser = {
   name?: string;
   email?: string;
   picture?: string;
+  preferred_language?: string;
   is_superadmin?: boolean;
+  created_at?: string | null;
   [key: string]: unknown;
 };
 

@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 
 from database import get_db
-from models import User, OrgMember, Organization
+from models import User, OrgMember, Organization, Project, ProjectMember
 from auth_utils import get_current_user, hash_password
 from routers.auth_routes import normalize_email
 
@@ -58,6 +58,43 @@ async def list_users(
     return [_user_dict(u) for u in users]
 
 
+@router.get("/users/projects")
+async def list_user_projects(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not current_user.is_superadmin:
+        raise HTTPException(403, "Superadmin required")
+
+    result = await db.execute(
+        select(User, Project, Organization)
+        .outerjoin(ProjectMember, ProjectMember.user_id == User.id)
+        .outerjoin(Project, Project.id == ProjectMember.project_id)
+        .outerjoin(Organization, Organization.id == Project.org_id)
+        .order_by(User.name, Project.name)
+    )
+
+    users_by_id = {}
+    for user, project, organization in result.all():
+        if user.id not in users_by_id:
+            users_by_id[user.id] = {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "projects": [],
+            }
+        if project:
+            users_by_id[user.id]["projects"].append({
+                "id": project.id,
+                "name": project.name,
+                "code": project.code,
+                "org_id": project.org_id,
+                "org_name": organization.name if organization else None,
+            })
+
+    return list(users_by_id.values())
+
+
 @router.post("/users", status_code=201)
 async def create_user(data: UserCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     if not current_user.is_superadmin:
@@ -97,6 +134,8 @@ async def update_user(user_id: str, data: UserUpdate, db: AsyncSession = Depends
         raise HTTPException(404, "User not found")
 
     update_data = data.model_dump(exclude_none=True)
+    if not current_user.is_superadmin and {"is_superadmin", "is_active"} & update_data.keys():
+        raise HTTPException(403, "Only superadmins can change account roles or status")
     if "password" in update_data:
         user.password_hash = hash_password(update_data.pop("password"))
     for k, v in update_data.items():

@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HardDrive, Cloud, Plus, Pencil, Trash2, Globe } from 'lucide-react';
 import Layout from '../components/Layout';
+import AccountInformation from '../components/AccountInformation';
 import api from '../api/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const [orgs, setOrgs] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState('');
   const [storageConfigs, setStorageConfigs] = useState([]);
@@ -76,6 +79,8 @@ export default function SettingsPage() {
     <Layout>
       <div className="p-6 space-y-6 animate-fade-in max-w-3xl">
         <h1 className="font-chivo font-700 text-2xl text-[#121212]">{t('settings.title')}</h1>
+
+        <AccountInformation user={user} />
 
         {/* Language */}
         <div className="ndm-card p-5">

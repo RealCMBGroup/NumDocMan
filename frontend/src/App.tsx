@@ -33,6 +33,12 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   return children;
 }
 
+function SuperAdminRoute({ children }: ProtectedRouteProps) {
+  const { user } = useAuth();
+  if (!user?.is_superadmin) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
 function AppLoader() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
@@ -64,7 +70,7 @@ function AppRouter() {
       <Route path="/projects" element={<ProtectedRoute><Suspense fallback={<AppLoader />}><ProjectsPage /></Suspense></ProtectedRoute>} />
       <Route path="/projects/:projectId" element={<ProtectedRoute><Suspense fallback={<AppLoader />}><ProjectDetailPage /></Suspense></ProtectedRoute>} />
       <Route path="/documents" element={<ProtectedRoute><Suspense fallback={<AppLoader />}><DocumentsPage /></Suspense></ProtectedRoute>} />
-      <Route path="/admin" element={<ProtectedRoute><Suspense fallback={<AppLoader />}><AdminPage /></Suspense></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><SuperAdminRoute><Suspense fallback={<AppLoader />}><AdminPage /></Suspense></SuperAdminRoute></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Suspense fallback={<AppLoader />}><SettingsPage /></Suspense></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -4,7 +4,6 @@ import { toast } from 'sonner';
 import { Plus, Upload, Download, FileText, Search, History, PenSquare, ChevronDown, Eye, Tag, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Layout from '../components/Layout';
 import api from '../api/api';
-import { BACKEND_URL } from '../api/api';
 
 const SignatureModal = React.lazy(() => import('../components/SignatureModal'));
 const PDFViewerModal = React.lazy(() => import('../components/PDFViewerModal'));
@@ -120,6 +119,20 @@ export default function DocumentsPage() {
       loadDocs();
     } catch { toast.error(t('errors.server_error')); }
     finally { setUploading(false); }
+  };
+
+  const handleDownload = async (doc) => {
+    try {
+      const response = await api.get(`/documents/${doc.id}/download`, { responseType: 'blob' });
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = doc.file_name || 'document';
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      toast.error(t('errors.server_error'));
+    }
   };
 
   const handleTransition = async () => {
@@ -269,7 +282,7 @@ export default function DocumentsPage() {
                       </td>
                       <td className="hidden lg:table-cell">
                         {doc.has_file ? (
-                          <button onClick={() => window.open(`${BACKEND_URL}/api/documents/${doc.id}/download`)} className="text-xs text-[#2E60CC] hover:underline font-ibm flex items-center gap-1">
+                          <button onClick={() => handleDownload(doc)} className="text-xs text-[#2E60CC] hover:underline font-ibm flex items-center gap-1">
                             <Download size={11} /> {doc.file_name?.substring(0, 15)}{doc.file_name?.length > 15 ? '...' : ''}
                           </button>
                         ) : (
