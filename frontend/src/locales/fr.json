@@ -203,6 +203,9 @@
     "title": "Administration",
     "users": "Utilisateurs",
     "roles": "Rôles",
+    "user_projects": "Projets des utilisateurs",
+    "associated_projects": "Projets associés",
+    "no_associated_projects": "Aucun projet associé",
     "create_user": "Nouvel utilisateur",
     "create_role": "Nouveau rôle",
     "role_name": "Nom du rôle",
@@ -216,6 +219,21 @@
   },
   "settings": {
     "title": "Paramètres",
+    "account_information": "Informations du compte",
+    "profile": "Profil",
+    "profile_name": "Nom complet",
+    "profile_email": "E-mail",
+    "account_reference": "Référence du compte",
+    "account_role": "Rôle",
+    "account_created_at": "Date de création",
+    "roles": {
+      "global_admin": "Administrateur global",
+      "standard_user": "Utilisateur standard"
+    },
+    "languages": {
+      "fr": "Français",
+      "en": "Anglais"
+    },
     "storage": "Stockage des fichiers",
     "storage_type": "Type de stockage",
     "local": "Local (répertoire serveur)",

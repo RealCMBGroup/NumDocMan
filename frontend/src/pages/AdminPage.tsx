@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Shield, Users, Building2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Shield, Users, Building2, FolderKanban } from 'lucide-react';
 import Layout from '../components/Layout';
 import api from '../api/api';
 import { useAuth } from '../context/AuthContext';
 
-const TABS = ['organizations', 'users', 'roles'];
+const TABS = ['organizations', 'users', 'roles', 'user-projects'];
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -15,6 +16,7 @@ export default function AdminPage() {
   const [orgs, setOrgs] = useState([]);
   const [selectedOrg, setSelectedOrg] = useState('');
   const [users, setUsers] = useState([]);
+  const [userProjects, setUserProjects] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -43,15 +45,35 @@ export default function AdminPage() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    try {
-      const [u, r] = await Promise.all([
-        api.get('/admin/users', { params: selectedOrg ? { org_id: selectedOrg } : {} }),
-        selectedOrg ? api.get(`/organizations/${selectedOrg}/roles`) : Promise.resolve({ data: [] }),
-      ]);
-      setUsers(u.data);
-      setRoles(r.data);
-    } catch { toast.error(t('errors.server_error')); }
-    finally { setLoading(false); }
+    const requests = await Promise.allSettled([
+      api.get('/admin/users', { params: selectedOrg ? { org_id: selectedOrg } : {} }),
+      selectedOrg ? api.get(`/organizations/${selectedOrg}/roles`) : Promise.resolve({ data: [] }),
+      api.get('/admin/users/projects'),
+    ]);
+
+    if (requests[0].status === 'fulfilled') setUsers(requests[0].value.data);
+    if (requests[1].status === 'fulfilled') setRoles(requests[1].value.data);
+    if (requests[2].status === 'fulfilled') setUserProjects(requests[2].value.data);
+
+    const requestNames = [
+      'GET /admin/users',
+      selectedOrg ? `GET /organizations/${selectedOrg}/roles` : null,
+      'GET /admin/users/projects',
+    ];
+    const failures = requests.flatMap((result, index) => {
+      if (result.status !== 'rejected' || !requestNames[index]) return [];
+      const error = result.reason;
+      const status = axios.isAxiosError(error)
+        ? error.response?.status ?? error.code ?? 'network error'
+        : 'unexpected error';
+      return [{ request: requestNames[index], status }];
+    });
+
+    if (failures.length > 0) {
+      console.error('Admin data requests failed:', failures);
+      toast.error(`${t('errors.server_error')}: ${failures.map(({ request, status }) => `${request} (${status})`).join(', ')}`);
+    }
+    setLoading(false);
   }, [selectedOrg, t]);
 
   useEffect(() => { loadData(); }, [loadData]);
@@ -174,7 +196,13 @@ export default function AdminPage() {
                 activeTab === tab ? 'border-[#2E60CC] text-[#2E60CC]' : 'border-transparent text-[#868E96] hover:text-[#495057]'
               }`}
             >
-              {tab === 'organizations' ? t('org.title') : tab === 'users' ? t('admin.users') : t('admin.roles')}
+              {tab === 'organizations'
+                ? t('org.title')
+                : tab === 'users'
+                  ? t('admin.users')
+                  : tab === 'roles'
+                    ? t('admin.roles')
+                    : t('admin.user_projects')}
             </button>
           ))}
         </div>
@@ -308,6 +336,59 @@ export default function AdminPage() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'user-projects' && (
+              <div className="space-y-4">
+                <h2 className="font-chivo font-700 text-base text-[#121212]">
+                  {t('admin.user_projects')}
+                </h2>
+                <div className="ndm-card overflow-hidden">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="table-dense">
+                        <th className="text-left">{t('admin.users')}</th>
+                        <th className="text-left">{t('admin.associated_projects')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {userProjects.length === 0 ? (
+                        <tr>
+                          <td colSpan={2} className="text-center py-8 text-sm text-[#868E96] font-ibm">
+                            {t('admin.no_users')}
+                          </td>
+                        </tr>
+                      ) : (
+                        userProjects.map(account => (
+                          <tr key={account.id} data-testid={`user-projects-${account.id}`} className="table-dense">
+                            <td className="align-top">
+                              <p className="font-ibm font-medium text-[#121212]">{account.name}</p>
+                              <p className="text-xs text-[#868E96] font-ibm">{account.email}</p>
+                            </td>
+                            <td>
+                              {account.projects.length === 0 ? (
+                                <span className="text-sm text-[#868E96] font-ibm">{t('admin.no_associated_projects')}</span>
+                              ) : (
+                                <ul className="space-y-1">
+                                  {account.projects.map(project => (
+                                    <li key={project.id} className="flex items-center gap-2 text-sm font-ibm text-[#121212]">
+                                      <FolderKanban size={14} className="text-[#2E60CC] flex-shrink-0" />
+                                      <span>{project.name} <span className="text-[#868E96]">({project.code})</span></span>
+                                      {project.org_name && (
+                                        <span className="text-xs text-[#868E96]">— {project.org_name}</span>
+                                      )}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </>
